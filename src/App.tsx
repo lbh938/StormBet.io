@@ -1,37 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
+import axios from 'axios';
 
-import WebApp from '@twa-dev/sdk'
+const BetCreation = () => {
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
 
-function App() {
-  const [count, setCount] = useState(0)
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    axios.post('/api/bets', { description, amount })
+      .then(response => {
+        console.log('Bet created:', response.data);
+      })
+      .catch(error => console.error('Error creating bet:', error));
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-        {/* Here we add our button with alert callback */}
-      <div className="card">
-        <button onClick={() => WebApp.showAlert(`Hello World! Current count is ${count}`)}>
-            Show Alert
-        </button>
-      </div>
-    </>
-  )
-}
+    <div>
+      <h2>Create a Bet</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Description</label>
+          <input 
+            type="text" 
+            value={description} 
+            onChange={e => setDescription(e.target.value)} 
+            required 
+          />
+        </div>
+        <div>
+          <label>Amount (€)</label>
+          <input 
+            type="number" 
+            value={amount} 
+            onChange={e => setAmount(e.target.value)} 
+            required 
+          />
+        </div>
+        <button type="submit">Create Bet</button>
+      </form>
+    </div>
+  );
+};
 
-export default App
+export default BetCreation;
