@@ -1,18 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import axios from 'axios';
+import  WebApp  from '@twa-dev/sdk';
 
-const BetCreation = () => {
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
+const BetCreation: React.FC = () => {
+  const [description, setDescription] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+
+  useEffect(() => {
+    // Initialize the Telegram WebApp
+    WebApp.ready();
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    axios.post('/api/bets', { description, amount })
-      .then(response => {
-        console.log('Bet created:', response.data);
+
+    // Retrieve user information from the WebApp
+    const user = WebApp.initDataUnsafe.user;
+
+    if (!user) {
+      console.error('User information is not available.');
+      return;
+    }
+
+    // Use fetch to make the POST request
+    fetch('/api/bets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description, amount, user }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Bet created:', data);
+        WebApp.showAlert('Bet created successfully!');
+        WebApp.close();
       })
-      .catch(error => console.error('Error creating bet:', error));
+      .catch((error) => {
+        console.error('Error creating bet:', error);
+        WebApp.showAlert('Error creating bet.');
+        WebApp.close();
+      });
   };
 
   return (
@@ -24,7 +52,7 @@ const BetCreation = () => {
           <input 
             type="text" 
             value={description} 
-            onChange={e => setDescription(e.target.value)} 
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)} 
             required 
           />
         </div>
@@ -33,7 +61,7 @@ const BetCreation = () => {
           <input 
             type="number" 
             value={amount} 
-            onChange={e => setAmount(e.target.value)} 
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)} 
             required 
           />
         </div>
