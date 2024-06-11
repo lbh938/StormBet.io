@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import  WebApp  from '@twa-dev/sdk';
+import WebApp from '@twa-dev/sdk';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 const BetCreation: React.FC = () => {
   const [description, setDescription] = useState<string>('');
@@ -22,21 +23,14 @@ const BetCreation: React.FC = () => {
       return;
     }
 
-    // Use fetch to make the POST request
-    fetch('/api/bets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ description, amount, user }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Bet created:', data);
+    // Use axios to make the POST request
+    axios.post('/api/bets', { description, amount, user })
+      .then((response: AxiosResponse) => {
+        console.log('Bet created:', response.data);
         WebApp.showAlert('Bet created successfully!');
         WebApp.close();
       })
-      .catch((error) => {
+      .catch((error: AxiosError) => {
         console.error('Error creating bet:', error);
         WebApp.showAlert('Error creating bet.');
         WebApp.close();
